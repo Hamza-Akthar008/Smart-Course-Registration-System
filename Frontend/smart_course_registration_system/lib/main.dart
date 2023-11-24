@@ -1,9 +1,7 @@
 import 'package:smart_course_registration_system/screens/Login.dart';
 import 'package:smart_course_registration_system/screens/admin/Add_New/add_new_batch_advisor.dart';
-import 'package:smart_course_registration_system/screens/admin/Add_New/add_new_course.dart';
 import 'package:smart_course_registration_system/screens/admin/Add_New/add_new_hod.dart';
 import 'package:smart_course_registration_system/screens/admin/Add_New/add_new_student.dart';
-import 'package:smart_course_registration_system/screens/admin/Add_New/add_new_study_plan.dart';
 import 'package:smart_course_registration_system/screens/admin/manage_batch_advisor.dart';
 import 'package:smart_course_registration_system/screens/admin/manage_hod.dart';
 import 'package:smart_course_registration_system/screens/admin/manage_offered_courses.dart';
@@ -95,19 +93,6 @@ class MyApp extends StatelessWidget {
             ChangeNotifierProvider(create: (context) => MenuAppController()),
           ],
           child: addnewstudent(),
-        ), '/add_new_study_plan': (context) => MultiProvider(
-          providers: [
-            ChangeNotifierProvider(create: (context) => MenuAppController()),
-          ],
-          child: addnewstudyplan(),
-
-        ),
-        '/add_new_course': (context) => MultiProvider(
-          providers: [
-            ChangeNotifierProvider(create: (context) => MenuAppController()),
-          ],
-          child: AddNewCourse(),
-
         )
       },
 
