@@ -76,7 +76,7 @@ class AddNEWSTUDENT extends State<addnewstudent> {
               }
               return null;
             },
-            prefixIcon: Icons.person,
+            prefixIcon: Icons.text_fields,
           ),
           SizedBox(height: 16),
           _buildValidatedTextField(
@@ -91,7 +91,7 @@ class AddNEWSTUDENT extends State<addnewstudent> {
               }
               return null;
             },
-            prefixIcon: Icons.person,
+            prefixIcon: Icons.badge,
           ),
           SizedBox(height: 16),
           _buildValidatedTextField(
@@ -103,7 +103,7 @@ class AddNEWSTUDENT extends State<addnewstudent> {
               }
               return null;
             },
-            prefixIcon: Icons.person,
+            prefixIcon: Icons.home,
           ),
           SizedBox(height: 16),
           _buildDropdownButton(
