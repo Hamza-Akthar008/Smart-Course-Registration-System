@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../../controllers/MenuAppController.dart';
 import '../../responsive.dart';
 import '../Component/Editabledata.dart';
@@ -6,8 +8,47 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../main/components/side_menu.dart';
+class ManageBatchAdvisor extends StatefulWidget {
+  @override
+  _ManageBatchAdvisorState createState() => _ManageBatchAdvisorState();
+}
 
-class ManageBatchAdvisor extends StatelessWidget {
+class _ManageBatchAdvisorState extends State<ManageBatchAdvisor> {
+  List<Map<String, dynamic>> batchAdvisors = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Call the method to fetch data when the widget is first created
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    final url = 'http://localhost:5000/managebatch_advisor/getallbatchadvisor'; // Replace with your API endpoint
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        // If the server returns a 200 OK response, parse the JSON
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        // Assuming your data is under a key like 'data'
+        final List<dynamic> hodsData = responseData['data'];
+
+        setState(() {
+
+          batchAdvisors = List<Map<String, dynamic>>.from(hodsData);
+
+        });
+      } else {
+        // If the server did not return a 200 OK response,
+        // throw an exception.
+        throw Exception('Failed to load data');
+      }
+    } catch (error) {
+      // Handle errors
+      print('Error fetching data: $error');
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,7 +88,11 @@ class ManageBatchAdvisor extends StatelessWidget {
                     ),
                   ),
                   EditableDataTable(
-                    headers: ['AdvisorID', 'DepartID', 'Advisor Name', 'Advisor Email', 'Advisor Contact','Edit','Delete'],
+                    headers: ['AdvisorID', 'depart_id','batch_id', 'advisor_name', 'advisor_email', 'advisor_contact','Edit','Delete'],
+                      data: batchAdvisors,
+                    deleteurl: 'http://localhost:5000/managebatch_advisor/delete_advisor',
+                    editurl:'http://localhost:5000/managebatch_advisor/edit_hod',
+                    redirect:  '/manage_batch_advisor',
                   ),
                 ],
               ),
