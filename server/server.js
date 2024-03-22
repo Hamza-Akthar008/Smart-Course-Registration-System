@@ -3,7 +3,7 @@ import "express-async-errors"
 import 'dotenv/config'
 import cors from "cors"
 import morgan from "morgan";
-import Student from "./models/student_model.js";
+
 //Security Library
 import helmet from "helmet"
 import xss from "xss-clean"
@@ -41,15 +41,7 @@ app.get('/',(req,res)=>{
 res.send("Hello");
 })
 
-app.get('/user',(req, res) => {
-    const currentStudents = await Student.findAll({
-      where: {
-        is_current: '1',
-      },
-      attributes: ['student_id', 'student_name', 'student_email', 'student_contact', 'student_address', 'batch_id', 'depart_id'],
-    });
-    return res.send(currentStudents);
-});
+
 app.use('/auth',authRoutes)
 app.use('/managestudentrecords',managestudent)
 app.use('/managehod',managehod)
