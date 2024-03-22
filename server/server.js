@@ -26,7 +26,7 @@ import managecourse from './routes/managecourse.js'
 //rest object
 const app = express()
 
-dbconfig();
+
 syncModels();
 app.use(xss());
 app.use(json());
