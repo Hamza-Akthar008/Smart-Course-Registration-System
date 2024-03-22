@@ -3,7 +3,7 @@ import "express-async-errors"
 import 'dotenv/config'
 import cors from "cors"
 import morgan from "morgan";
-import Student from './models/student_model.js';
+import Student from "./models/student_model.js";
 //Security Library
 import helmet from "helmet"
 import xss from "xss-clean"
@@ -42,27 +42,13 @@ res.send("Hello");
 })
 
 app.get('/user',(req, res) => {
-  try {
-    // Fetch all students where is_current is true
     const currentStudents = await Student.findAll({
       where: {
         is_current: '1',
       },
       attributes: ['student_id', 'student_name', 'student_email', 'student_contact', 'student_address', 'batch_id', 'depart_id'],
     });
-
-    return res.status(200).json({
-      success: true,
-      message: 'Successfully retrieved all current students',
-      students: currentStudents,
-    });
-  } catch (error) {
-    console.error('Error getting current students:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'An error occurred while fetching current students',
-    });
-  }
+    return res.send(currentStudents);
 });
 app.use('/auth',authRoutes)
 app.use('/managestudentrecords',managestudent)
