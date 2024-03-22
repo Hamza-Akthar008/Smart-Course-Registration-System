@@ -66,7 +66,7 @@ export const getAllCurrentStudents = async (req, res) => {
       },
       attributes: ['student_id', 'student_name', 'student_email', 'student_contact', 'student_address', 'batch_id', 'depart_id'],
     });
-
+console.log(currentStudents);
     return res.status(200).json({
       success: true,
       message: 'Successfully retrieved all current students',
