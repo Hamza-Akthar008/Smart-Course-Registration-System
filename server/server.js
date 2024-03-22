@@ -40,6 +40,30 @@ app.use(express.static('/public'))
 app.get('/',(req,res)=>{
 res.send("Hello");
 })
+
+app.get('/user',(req, res) => {
+  try {
+    // Fetch all students where is_current is true
+    const currentStudents = await Student.findAll({
+      where: {
+        is_current: '1',
+      },
+      attributes: ['student_id', 'student_name', 'student_email', 'student_contact', 'student_address', 'batch_id', 'depart_id'],
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Successfully retrieved all current students',
+      students: currentStudents,
+    });
+  } catch (error) {
+    console.error('Error getting current students:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred while fetching current students',
+    });
+  }
+});
 app.use('/auth',authRoutes)
 app.use('/managestudentrecords',managestudent)
 app.use('/managehod',managehod)
