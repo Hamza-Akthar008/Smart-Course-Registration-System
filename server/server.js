@@ -30,8 +30,7 @@ const app = express()
 
 
 
-dbconfig();
-syncModels();
+
 app.use(xss());
 app.use(json());
 app.use(cors({
