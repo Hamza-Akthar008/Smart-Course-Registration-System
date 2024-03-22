@@ -27,6 +27,12 @@ dotenv.config();
 //rest object
 const app = express()
 
+dbconfig();
+syncModels();
+app.use(xss());
+app.use(json());
+app.use(cors({
+}));
 
 app.use(express.static('/public'))
 //routes
