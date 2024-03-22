@@ -43,6 +43,10 @@ app.use(express.static('/public'))
 app.get('/', (req, res) => {
     res.send('Hello');
 });
+
+app.get('/',(req,res)=>{
+res.send("Hello");
+})
 app.use('/auth',authRoutes)
 app.use('/managestudentrecords',managestudent)
 app.use('/managehod',managehod)
