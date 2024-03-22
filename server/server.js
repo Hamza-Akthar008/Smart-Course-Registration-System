@@ -3,7 +3,7 @@ import "express-async-errors"
 import 'dotenv/config'
 import cors from "cors"
 import morgan from "morgan";
-
+import Student from './models/student_model.js';
 //Security Library
 import helmet from "helmet"
 import xss from "xss-clean"
