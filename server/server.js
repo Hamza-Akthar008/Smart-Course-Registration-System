@@ -1,6 +1,6 @@
 import express, { json } from "express"
 import "express-async-errors"
-import dotenv from "dotenv"
+import 'dotenv/config'
 import cors from "cors"
 import morgan from "morgan";
 
@@ -19,8 +19,7 @@ import managedepart from './routes/managedepart.js'
 import managebatch from './routes/managebatch.js'
 import managestudyplan from './routes/managestudyplan.js'
 import managecourse from './routes/managecourse.js'
-//DOTENV CONFIG 
-dotenv.config();
+
 
 //Mongoose Connect
 
