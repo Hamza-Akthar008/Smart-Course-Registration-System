@@ -28,15 +28,6 @@ dotenv.config();
 const app = express()
 
 
-
-
-
-app.use(xss());
-app.use(json());
-app.use(cors({
-
-}));
-app.use(morgan("dev"));
 app.use(express.static('/public'))
 //routes
 
