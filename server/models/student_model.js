@@ -1,8 +1,9 @@
 import { DataTypes } from 'sequelize';
-import {sequelize} from '../config/dbconfig.js'; 
+import { sequelize } from '../config/dbconfig.js';
 import AcademicsStaff from './academic_staff.js';
-import Batch from './batch.js'
+import Batch from './batch.js';
 import Department from './department.js';
+
 const Student = sequelize.define('student', {
   student_id: {
     type: DataTypes.STRING,
@@ -26,18 +27,18 @@ const Student = sequelize.define('student', {
     allowNull: true,
   },
   batch_id: {
-    type: DataTypes.STRING, // Adjust the data type accordingly
+    type: DataTypes.STRING,
     allowNull: false,
     references: {
-      model: Batch, 
+      model: Batch,
       key: 'batch_id',
     },
   },
   depart_id: {
-    type: DataTypes.STRING, // Adjust the data type accordingly
+    type: DataTypes.STRING,
     allowNull: false,
     references: {
-      model: Department, 
+      model: Department,
       key: 'depart_id',
     },
   },
@@ -50,12 +51,20 @@ const Student = sequelize.define('student', {
     defaultValue: true,
   },
   academics_id: {
-    type: DataTypes.STRING, // Adjust the data type accordingly
+    type: DataTypes.STRING,
     allowNull: false,
     references: {
-      model: AcademicsStaff, // Reference the AcademicsStaff model
+      model: AcademicsStaff,
       key: 'academics_id',
     },
+  },
+  is_verify: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  otp: {
+    type: DataTypes.STRING,
+    defaultValue: '',
   },
 });
 

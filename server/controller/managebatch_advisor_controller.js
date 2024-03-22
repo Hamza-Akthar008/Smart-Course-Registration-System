@@ -134,3 +134,28 @@ export const editbatchadvisorById = async (req, res) => {
 };
 
 
+export const get_advisor = async (req, res) => {
+  const { HODID } = req.body;
+  console.log(HODID);
+  try {
+    // Fetch all students where is_current is true
+    const currentStudents = await Batch_Advisor.findAll({
+      where: {
+        
+        AdvisorID:HODID
+      },
+      attributes: ['AdvisorID', 'depart_id',"batch_id", 'advisor_name', 'advisor_contact', 'advisor_email'],
+    });
+    return res.status(200).json({
+      success: true,
+      
+      students: currentStudents,
+    });
+  } catch (error) {
+    console.error('Error getting current students:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred while fetching current students',
+    });
+  }
+};

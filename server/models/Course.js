@@ -1,11 +1,11 @@
 import { DataTypes } from 'sequelize';
-import {sequelize} from '../config/dbconfig.js'; 
+import { sequelize } from '../config/dbconfig.js'; 
 
 const Course = sequelize.define('Course', {
   CourseID: {
     type: DataTypes.STRING,
-    primaryKey: true,
     allowNull: false,
+    primaryKey: true,
   },
   Course_Name: {
     type: DataTypes.STRING,
@@ -15,9 +15,17 @@ const Course = sequelize.define('Course', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  Course_Pre_reg: {
+    type: DataTypes.STRING,
+    defaultValue: null,
+  },
   Course_Description: {
     type: DataTypes.STRING,
   },
+}, {
+  
+ 
+
 });
 
 export default Course;

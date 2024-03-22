@@ -4,11 +4,11 @@ import HOD from "../models/hod.js";
 
 
 
-export const addNewHOD = async (req, res) => {
+export const addNewHOD = async (req, res,next)  => {
   try {
     // Destructure the required fields from the request body
     const { HODID, depart_id, Hod_name, hod_email, hod_contact, hod_password } = req.body;
-console.log(req.body);
+
     // Check if an HOD with the given email already exists
     const existingHOD = await HOD.findOne({
       where: { hod_email },
@@ -29,9 +29,33 @@ console.log(req.body);
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 };
+export const getHOD = async (req, res) => {
+  const { HODID } = req.body;
+  console.log(HODID);
+  try {
+    // Fetch all students where is_current is true
+    const currentStudents = await HOD.findAll({
+      where: {
+        
+        HODID:HODID
+      },
+      attributes: ['HODID', 'depart_id', 'Hod_name', 'hod_contact', 'hod_email'],
+    });
+    return res.status(200).json({
+      success: true,
+      
+      students: currentStudents,
+    });
+  } catch (error) {
+    console.error('Error getting current students:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred while fetching current students',
+    });
+  }
+};
 
-
-export const getAllHODs = async (req, res) => {
+export const getAllHODs = async (req, res,next) => {
   try {
     // Fetch all HOD records from the database
     const allHODs = await HOD.findAll({
@@ -45,7 +69,7 @@ console.log(allHODs);
   }
 };
 
-export const deleteHODById = async (req, res) => {
+export const deleteHODById = async (req, res,next)  => {
   try {
     const { HODID } = req.body;
 
@@ -66,7 +90,7 @@ console.log(hodToDelete);
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 };
-export const editHODById = async (req, res) => {
+export const editHODById = async (req, res,next)  => {
   try {
     const { HODID, depart_id, Hod_name, hod_contact, hod_email } = req.body;
 

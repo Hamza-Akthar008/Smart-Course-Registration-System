@@ -8,13 +8,16 @@ export const addNewStudyPlan = async (req, res) => {
       studplanid,
       depart_id,
       batch_id,
-      studyplan_details,
+      study_plan_details,
+      total_credit_hours,
     } = req.body;
 
     // Check if the study plan with the same studplanid already exists
     const existingStudyPlan = await StudyPlan.findOne({
       where: {
         studplanid: studplanid,
+        depart_id:depart_id,
+        batch_id:batch_id
       },
     });
 
@@ -31,7 +34,8 @@ export const addNewStudyPlan = async (req, res) => {
       studplanid,
       depart_id,
       batch_id,
-      studyplan_details,
+      study_plan_details,
+      total_credit_hours
     });
 
     // Send a success response with the newly created StudyPlan record
@@ -80,21 +84,16 @@ export const getAllStudyPlans = async (req, res) => {
   export const getStudyPlansbyid = async (req, res) => {
   
     const studplanid = req.body.studplanid;
-   
+   console.log(studplanid);
     try {
       // Find all StudyPlans, excluding the createdAt and updatedAt fields
-      const studyPlans = await StudyPlan.findOne({
-        where : {"studplanid":studplanid},
-        attributes: {
-         include:["studyplan_details"],exclude:["studplanid","depart_id","batch_id","createdAt","updatedAt"]
-        },
-      });
+      const studyPlans = await StudyPlan.findByPk(studplanid);
 
       // Send a success response with the fetched StudyPlans
       res.status(200).json({
         success: true,
         message: 'Study plans retrieved successfully',
-        data: studyPlans.studyplan_details,
+        study_plan_details: studyPlans.study_plan_details,
       });
     } catch (error) {
       // Handle any errors that occur during the process
@@ -110,14 +109,12 @@ export const getAllStudyPlans = async (req, res) => {
     try {
       // Extract study plan ID from the request parameters
       const { studplanid } = req.body;
-  
       // Check if the study plan exists
       const existingStudyPlan = await StudyPlan.findOne({
         where: {
           studplanid,
         },
       });
-  
       if (!existingStudyPlan) {
         // If the study plan doesn't exist, send a not found response
         return res.status(404).json({
@@ -125,10 +122,8 @@ export const getAllStudyPlans = async (req, res) => {
           message: 'Study plan not found',
         });
       }
-  
       // Delete the study plan from the database
       await existingStudyPlan.destroy();
-  
       // Send a success response
       res.status(200).json({
         success: true,

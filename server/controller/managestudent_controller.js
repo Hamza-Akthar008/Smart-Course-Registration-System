@@ -4,6 +4,7 @@ import Student from '../models/student_model.js';
 
 export const add_new_student = async (req, res) => {
   const {
+    student_id,
     student_name,
     student_email,
     student_contact,
@@ -31,6 +32,7 @@ export const add_new_student = async (req, res) => {
 
     // Create a new student
     const newStudent = await Student.create({
+      student_id,
       student_name,
       student_email,
       student_contact,
@@ -41,7 +43,7 @@ export const add_new_student = async (req, res) => {
       academics_id,
     });
 
-    return res.status(201).json({
+    return res.status(200).json({
       success: true,
       message: 'Student added successfully',
       student: newStudent,
@@ -68,6 +70,31 @@ export const getAllCurrentStudents = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: 'Successfully retrieved all current students',
+      students: currentStudents,
+    });
+  } catch (error) {
+    console.error('Error getting current students:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred while fetching current students',
+    });
+  }
+};
+
+export const getStudents = async (req, res) => {
+  const { student_id } = req.body;
+  try {
+    // Fetch all students where is_current is true
+    const currentStudents = await Student.findAll({
+      where: {
+        is_current: '1',
+        student_id:student_id
+      },
+      attributes: ['student_id', 'student_name', 'student_email', 'student_contact', 'student_address', 'batch_id', 'depart_id'],
+    });
+    return res.status(200).json({
+      success: true,
+      
       students: currentStudents,
     });
   } catch (error) {
