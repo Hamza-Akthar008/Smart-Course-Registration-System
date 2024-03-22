@@ -1,9 +1,11 @@
 import { Sequelize } from 'sequelize';
 
+
 const sequelize = new Sequelize({
-  dialect: "mysql",
+  dialect: process.env.DB_DIALECT,
   dialectModule: 'mysql2',
   username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD, // Add the password here
   host: process.env.DB_HOST,
   database: process.env.DB_DATABASE,
 });
