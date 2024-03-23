@@ -2,7 +2,6 @@ import { Sequelize } from 'sequelize';
 
 
 const sequelize = new Sequelize({
-  dialectModule: 'mysql2',
  dialect: process.env.DB_DIALECT,
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD, // Add the password here
