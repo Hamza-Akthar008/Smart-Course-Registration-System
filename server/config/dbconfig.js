@@ -2,12 +2,12 @@ import { Sequelize } from 'sequelize';
 
 
 const sequelize = new Sequelize({
-  dialect: 'mysql',
   dialectModule: 'mysql2',
-  username: 'sql6693530',
-  password: 'QW2RwtZVg9', // Add the password here
-  host: 'jdbc:mysql://sql6.freemysqlhosting.net:3306/sql6693530',
-  database: 'sql6693530',
+ dialect: process.env.DB_DIALECT,
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD, // Add the password here
+  host: process.env.DB_HOST,
+  database: process.env.DB_DATABASE,
 });
 
 const dbconfig = async () => {
