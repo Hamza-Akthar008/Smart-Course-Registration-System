@@ -6,7 +6,7 @@ const sequelize = new Sequelize({
   dialectModule: 'mysql2',
   username: 'sql6693530',
   password: 'QW2RwtZVg9', // Add the password here
-  host: 'sql6.freemysqlhosting.net',
+  host: 'jdbc:mysql://sql6.freemysqlhosting.net:3306/sql6693530',
   database: 'sql6693530',
 });
 
