@@ -41,14 +41,13 @@ import { string } from "yup";
 const app = express()
 await dbconfig();
 await syncModels();
-app.use(xss());
-app.use(json());
-app.use(cors({
-}));
-app.use(morgan("dev"));
+
 app.use(express.static('/public'))
 app.use('/uploads', express.static('uploads'));
 //routes
+
+app.get('/',(req,res)=>{
+res.send("HELLO");})
 app.use('/auth',authRoutes)
 app.use('/managestudentrecords',userAuth,managestudent)
 app.use('/manageacademic',userAuth,manageacademic)
