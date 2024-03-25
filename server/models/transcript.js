@@ -3,7 +3,7 @@ import {sequelize} from '../config/dbconfig.js';
 import Student from './student_model.js';
 
 // Define the Transcript model
-const Transcript = sequelize.define('Transcript', {
+const Transcript = sequelize.define('transcript', {
   transcriptId: {
     type: DataTypes.STRING,
     primaryKey: true,

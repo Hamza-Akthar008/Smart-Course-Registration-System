@@ -3,7 +3,7 @@ import { sequelize } from '../config/dbconfig.js';
 import Course from './Course.js'; // Import the Course model
 import Department from './department.js'; // Import the Department model
 
-const CourseOffering = sequelize.define('CourseOffering', {
+const CourseOffering = sequelize.define('courseoffering', {
   section: {
     type: DataTypes.STRING,
     allowNull: false,

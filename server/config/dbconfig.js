@@ -1,10 +1,12 @@
 import { Sequelize } from 'sequelize';
-
+import mysql2 from 'mysql2';
 const sequelize = new Sequelize({
-  dialect: "mysql",
+  dialect: process.env.DB_DIALECT,
+  dialectModule: mysql2,
   username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
   host: process.env.DB_HOST,
-  database: process.env.DB_DATABASE,
+  database:process.env.DB_DATABASE,
 });
 
 const dbconfig = async () => {

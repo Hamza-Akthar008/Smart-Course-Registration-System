@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/dbconfig.js'; 
 
-const Course = sequelize.define('Course', {
+const Course = sequelize.define('course', {
   CourseID: {
     type: DataTypes.STRING,
     allowNull: false,

@@ -3,7 +3,7 @@ import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/dbconfig.js';
 import   Student from'./student_model.js';
 
-const RegistrationApplication = sequelize.define('RegistrationApplication', {
+const RegistrationApplication = sequelize.define('registrationapplication', {
   application_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,

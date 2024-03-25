@@ -4,7 +4,7 @@ import { sequelize } from '../config/dbconfig.js';
 import Student from './student_model.js';
 import Department from './department.js';
 
-const Meeting = sequelize.define('Meeting', {
+const Meeting = sequelize.define('meeting', {
   meeting_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
