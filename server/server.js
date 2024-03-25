@@ -49,6 +49,9 @@ app.use(morgan("dev"));
 app.use(express.static('/public'))
 app.use('/uploads', express.static('uploads'));
 //routes
+
+app.get('/',(req,res)=>{
+res.send("HELLO");})
 app.use('/auth',authRoutes)
 app.use('/managestudentrecords',userAuth,managestudent)
 app.use('/manageacademic',userAuth,manageacademic)
