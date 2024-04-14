@@ -39,7 +39,9 @@ import { string } from "yup";
 //Mongoose Connect
 //rest object
 const app = express()
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:50007'
+}));
 await dbconfig();
 await syncModels();
 
