@@ -30,7 +30,7 @@ import registration_application from "./routes/registration_application.js"
 import managemeeting from './routes/managemeeting.js'
 import managetranscript from './routes/managetranscript.js'
 import manageacademic from './routes/manageacademic.js'
-import pdf  from 'pdf-poppler';
+
 import fs from 'fs'
 import ConvertAPI from 'convertapi';
 import { string } from "yup";
