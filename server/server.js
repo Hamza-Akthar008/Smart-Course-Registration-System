@@ -39,14 +39,12 @@ import { string } from "yup";
 //Mongoose Connect
 //rest object
 const app = express()
-app.use((req, res, next) => {
- 
-  // You may need to adjust other CORS headers depending on your needs
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  next();
-});
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 await dbconfig();
 await syncModels();
 
