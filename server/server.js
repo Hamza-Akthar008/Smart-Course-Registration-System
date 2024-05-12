@@ -39,12 +39,19 @@ import { string } from "yup";
 //Mongoose Connect
 //rest object
 const app = express()
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'application/json'],
-  credentials: true
-}));
+app.use(cors());
+
+// Your other routes and middleware...
+
+app.options('*', cors());
+
+// Handle preflight requests explicitly
+app.options('*', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, application/json');
+  res.sendStatus(204);
+});
 await dbconfig();
 await syncModels();
 
