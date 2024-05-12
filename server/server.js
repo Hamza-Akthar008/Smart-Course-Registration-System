@@ -40,7 +40,7 @@ import { string } from "yup";
 //rest object
 const app = express()
 app.use(cors({
-  origin: 'http://localhost:50007'
+  origin: '*'
 }));
 await dbconfig();
 await syncModels();
