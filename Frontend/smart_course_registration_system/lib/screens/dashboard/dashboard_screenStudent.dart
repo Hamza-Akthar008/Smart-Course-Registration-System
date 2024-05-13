@@ -1,12 +1,22 @@
-import '../../responsive.dart';
 import 'package:flutter/material.dart';
 import '../../constants.dart';
 import 'components/header.dart';
 
-class DashboardScreenStudent extends StatelessWidget {
-  String parameter; // Add a parameter variable
+class DashboardScreenStudent extends StatefulWidget {
+  final String parameter;
+
   // Constructor to receive the parameter
   DashboardScreenStudent({required this.parameter});
+
+  @override
+  _DashboardScreenStudentState createState() => _DashboardScreenStudentState();
+}
+
+class _DashboardScreenStudentState extends State<DashboardScreenStudent> {
+
+
+  @override
+
 
   @override
   Widget build(BuildContext context) {
@@ -16,20 +26,11 @@ class DashboardScreenStudent extends StatelessWidget {
         padding: EdgeInsets.all(defaultPadding),
         child: Column(
           children: [
-            Header( Parameter: parameter),
+            Header(Parameter: widget.parameter),
             SizedBox(height: defaultPadding),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  flex: 5,
-                  child: Column(
-                    // Use the 'parameter' variable as needed in your UI
+            // Display student information
 
-                  ),
-                ),
-              ],
-            )
+
           ],
         ),
       ),

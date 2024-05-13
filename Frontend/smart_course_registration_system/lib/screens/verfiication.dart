@@ -6,14 +6,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../responsive.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-class LoginScreen extends StatelessWidget {
-  // Controllers for email, password, and OTP text fields
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+class OTPScreen extends StatefulWidget {
+
+
+
+
+  @override
+  _OTPScreenState createState() => _OTPScreenState();
+}
+
+class _OTPScreenState extends State<OTPScreen> {
   final TextEditingController otpController = TextEditingController();
 
-  // Flag to determine if OTP input is required
-  bool isOTPRequired = false;
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +124,7 @@ class LoginScreen extends StatelessWidget {
               totalRepeatCount: 100,
               speed: Duration(milliseconds: 200),
               pause: Duration(milliseconds: 1000),
-              text: ['Welcome to'' Smart Course Registration System'],
+              text: ['Welcome to Smart Course Registration System'],
               textStyle: TextStyle(
                 color: Color(0xFFF3F4F6),
                 fontSize: 24,
@@ -150,36 +154,7 @@ class LoginScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Email',
-                style: TextStyle(
-                  color: Color(0xFF334155),
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: Colors.white,
-                ),
-                child: TextField(
-                  controller: emailController,
-                  style: TextStyle(color: Color(0xFF334155)),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    prefixIcon: Icon(
-                      Icons.email,
-                      color: Color(0xFF334155),
-                    ),
-                    hintText: 'Email',
-                    hintStyle: TextStyle(color: Color(0xFF334155)),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 15),
-              const Text(
-                'Password',
+                'OTP',
                 style: TextStyle(
                   color: Color(0xFF334155),
                   fontSize: 20,
@@ -193,80 +168,25 @@ class LoginScreen extends StatelessWidget {
                   color: Colors.white,
                 ),
                 child: TextField(
-                  controller: passwordController,
-                  obscureText: true,
+                  controller: otpController,
                   style: TextStyle(color: Colors.black),
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     prefixIcon: Icon(
-                      Icons.lock,
+                      Icons.vpn_key,
                       color: Color(0xFF334155),
                     ),
-                    hintText: 'Password',
+                    hintText: 'Enter OTP',
                     hintStyle: TextStyle(color: Colors.black),
                   ),
                 ),
               ),
               const SizedBox(height: 35),
-              // Check if OTP is required
-              if (isOTPRequired)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'OTP',
-                      style: TextStyle(
-                        color: Color(0xFF334155),
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: Colors.white,
-                      ),
-                      child: TextField(
-                        controller: otpController,
-                        style: TextStyle(color: Colors.black),
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          prefixIcon: Icon(
-                            Icons.vpn_key,
-                            color: Color(0xFF334155),
-                          ),
-                          hintText: 'Enter OTP',
-                          hintStyle: TextStyle(color: Colors.black),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              const SizedBox(height: 35),
-              Align(
-                alignment: Alignment.centerRight,
-                child: InkWell(
-                  onTap: () {
-                    // Navigate to the forgot password screen
-                    Navigator.pushNamed(context, "/forgot_password_request");
-                  },
-                  child: Text(
-                    'Forgot Password?',
-                    style: TextStyle(
-                      color: Colors.blue,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
               MouseRegion(
                 cursor: SystemMouseCursors.click,
                 child: GestureDetector(
                   onTap: () {
-                    performLogin(context);
+                    sendOTP(context); // Call the sendOTP function
                   },
                   child: Container(
                     decoration: BoxDecoration(
@@ -277,7 +197,7 @@ class LoginScreen extends StatelessWidget {
                       child: Padding(
                         padding: EdgeInsets.all(10.0),
                         child: Text(
-                          ' Log In',
+                          ' Verify OTP',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 30,
@@ -296,83 +216,53 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  Future<void> performLogin(BuildContext context) async {
-    // Get email, password, and OTP from text fields
-    final email = emailController.text;
-    final password = passwordController.text;
-
-
-    // Ensure that email and password are not empty
-    if (email.isEmpty || password.isEmpty) {
-      showLoginFailedToast("Please provide email and password");
-      return;
-    }
-
+  Future<void> sendOTP(BuildContext context) async {
     try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? email=  prefs.getString('useremail');
+
       final response = await http.post(
-        Uri.parse('http://localhost:5000/auth/login'),
+        Uri.parse('http://localhost:5000/auth/send_otp'),
         headers: {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'staff_email': email,
-          'staff_password': password,
+        'student_email':email,
+          'otp':otpController.text,
         }),
       );
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
-        final bool otpRequired = responseData['otp'] || false;
 
-        // If OTP is required, update the UI to include OTP input
-        if (otpRequired) {
-          final SharedPreferences prefs = await SharedPreferences.getInstance();
-          prefs.setString('useremail', email);
-          print(email);
-Navigator.pushNamed(context, "/otp_screen");
-        }
-        else
-          {
-            final String token = responseData['token'];
-            final String userType = responseData['userType'];
-            final String userid = responseData['userid'];
-
-            final SharedPreferences prefs = await SharedPreferences.getInstance();
-            prefs.setString('token', token);
-            prefs.setString('usertype', userType);
-            prefs.setString('userid', userid);
-
-            showLoginSuccessToast('${responseData['message']}');
-
-            Navigator.pushNamed(context, "/dashboard");
-          }
-
-
+        showSuccessToast(responseData['message']);
+        Navigator.pushNamed(context, "/");
       } else {
-        showLoginFailedToast("Invalid credentials");
+        showErrorToast("Failed to send OTP");
       }
     } catch (error) {
-      print("Login failed: $error");
-      showLoginFailedToast("An error occurred");
+      print("Failed to send OTP: $error");
+      showErrorToast("An error occurred");
     }
   }
 
-  void showLoginFailedToast(String message) {
-    Fluttertoast.showToast(
-      msg: message,
-      toastLength: Toast.LENGTH_LONG,
-      gravity: ToastGravity.BOTTOM,
-      backgroundColor: Colors.red,
-      textColor: Colors.white,
-      timeInSecForIosWeb: 3,
-    );
-  }
-
-  void showLoginSuccessToast(String message) {
+  void showSuccessToast(String message) {
     Fluttertoast.showToast(
       msg: message,
       toastLength: Toast.LENGTH_LONG,
       gravity: ToastGravity.BOTTOM,
       backgroundColor: Colors.green,
+      textColor: Colors.white,
+      timeInSecForIosWeb: 3,
+    );
+  }
+
+  void showErrorToast(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Colors.red,
       textColor: Colors.white,
       timeInSecForIosWeb: 3,
     );

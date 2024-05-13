@@ -1,21 +1,22 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../controllers/MenuAppController.dart';
 import '../../responsive.dart';
-import '../Component/Editabledata.dart';
 import '../dashboard/dashboard_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import '../Component/Editabledata.dart';
+import '../main/components/side_menu.dart'; // Adjust the import path
 
-import '../main/components/side_menu.dart';
-class ManageBatchAdvisor extends StatefulWidget {
+class ManageBatch extends StatefulWidget {
   @override
-  _ManageBatchAdvisorState createState() => _ManageBatchAdvisorState();
+  _ManageBatchState createState() => _ManageBatchState();
 }
 
-class _ManageBatchAdvisorState extends State<ManageBatchAdvisor> {
-  List<Map<String, dynamic>> batchAdvisors = [];
+class _ManageBatchState extends State<ManageBatch> {
+  List<Map<String, dynamic>> batches = [];
 
   @override
   void initState() {
@@ -25,7 +26,7 @@ class _ManageBatchAdvisorState extends State<ManageBatchAdvisor> {
   }
 
   Future<void> fetchData() async {
-    final url = 'http://localhost:5000/managebatch_advisor/getallbatchadvisor'; // Replace with your API endpoint
+    final url = 'http://localhost:5000/managebatch/getallbatch';
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString('token');
     final Map<String, String> headers = {
@@ -42,12 +43,10 @@ class _ManageBatchAdvisorState extends State<ManageBatchAdvisor> {
         // If the server returns a 200 OK response, parse the JSON
         final Map<String, dynamic> responseData = json.decode(response.body);
         // Assuming your data is under a key like 'data'
-        final List<dynamic> hodsData = responseData['data'];
+        final List<dynamic> batchData = responseData['data'];
 
         setState(() {
-
-          batchAdvisors = List<Map<String, dynamic>>.from(hodsData);
-
+          batches = List<Map<String, dynamic>>.from(batchData);
         });
       } else {
         // If the server did not return a 200 OK response,
@@ -59,6 +58,7 @@ class _ManageBatchAdvisorState extends State<ManageBatchAdvisor> {
       print('Error fetching data: $error');
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,7 +68,7 @@ class _ManageBatchAdvisorState extends State<ManageBatchAdvisor> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // We want this side menu only for large screen
+            // We want this side menu only for a large screen
             if (Responsive.isDesktop(context))
               Expanded(
                 // default flex = 1
@@ -78,33 +78,35 @@ class _ManageBatchAdvisorState extends State<ManageBatchAdvisor> {
             Expanded(
               // It takes 5/6 part of the screen
               flex: 5,
-              child: Column(
-                children: [
-                  DashboardScreen(parameter: "Manage Batch Advisor"),
-                  SizedBox(height: 20),
-                  Padding(
-                    padding: EdgeInsets.only(right: 30.0),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/add_new_batch_advisor');
-                        },
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all<Color>(Color(0xFF334155)),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    DashboardScreen(parameter: "Manage Batch"),
+                    SizedBox(height: 20),
+                    Padding(
+                      padding: EdgeInsets.only(right: 30.0),
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/add_new_batch');
+                          },
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(Color(0xFF334155)),
+                          ),
+                          child: Text('Add New Batch'),
                         ),
-                        child: Text('Add New Batch Advisor'),
                       ),
                     ),
-                  ),
-                  EditableDataTable(
-                    headers: ['AdvisorID', 'depart_id','batch_id', 'advisor_name', 'advisor_email', 'advisor_contact','Edit','Delete'],
-                      data: batchAdvisors,
-                    deleteurl: 'http://localhost:5000/managebatch_advisor/delete_advisor',
-                    editurl:'http://localhost:5000/managebatch_advisor/edit_hod',
-                    redirect:  '/manage_batch_advisor',
-                  ),
-                ],
+                    EditableDataTable(
+                      headers: ['batch_id', 'batch_name', 'Edit', 'Delete'],
+                      data: batches,
+                      deleteurl: 'http://localhost:5000/managebatch/delete_batch',
+                      editurl: 'http://localhost:5000/managebatch/edit_batch',
+                      redirect: '/manage_batch',
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

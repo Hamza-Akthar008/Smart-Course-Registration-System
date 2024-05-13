@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import '../../constants.dart';
 import 'components/header.dart';
 
-class DashboardScreen extends StatelessWidget {
-   String parameter; // Add a parameter variable
+class DashboardScreenHOD extends StatelessWidget {
+  String parameter; // Add a parameter variable
   // Constructor to receive the parameter
-  DashboardScreen({required this.parameter});
+  DashboardScreenHOD({required this.parameter});
 
   @override
   Widget build(BuildContext context) {

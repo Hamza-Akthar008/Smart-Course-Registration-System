@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../controllers/MenuAppController.dart';
 import '../../responsive.dart';
@@ -23,10 +24,18 @@ class _ManageOfferedCourseState extends State<ManageOfferedCourse> {
     _fetchCourses();
   }
   Future<void> _fetchCourses() async {
-    final url = Uri.parse('http://localhost:5000/managecourse/getAllCourses');
-
+    final url = 'http://localhost:5000/managecourse/getAllCourses';
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('token');
+    final Map<String, String> headers = {
+      'Authorization': '${token}',
+      'Content-Type': 'application/json', // Add any other headers you need
+    };
     try {
-      final response = await http.get(url);
+      final response = await http.get(
+        Uri.parse(url),
+        headers: headers,
+      );
 
       if (response.statusCode == 200) {
         // Parse the JSON response
@@ -82,6 +91,23 @@ class _ManageOfferedCourseState extends State<ManageOfferedCourse> {
                           backgroundColor: MaterialStateProperty.all<Color>(Color(0xFF334155)),
                         ),
                         child: Text('Add New Course'),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 30),
+                  Padding(
+                    padding: EdgeInsets.only(right: 52.0),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/offer_course');
+
+                        },
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all<Color>(Color(0xFF334155)),
+                        ),
+                        child: Text('Offer Course'),
                       ),
                     ),
                   ),

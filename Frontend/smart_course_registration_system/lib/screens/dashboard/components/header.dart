@@ -1,7 +1,9 @@
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '/controllers/MenuAppController.dart';
 import '/responsive.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+
 import 'package:provider/provider.dart';
 import '../../../constants.dart';
 class Header extends StatelessWidget {
@@ -51,17 +53,28 @@ class ProfileCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-
           if (!Responsive.isMobile(context))
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: defaultPadding / 2),
-              child: Text("Angelina Jolie"),
+              padding: const EdgeInsets.symmetric(horizontal: defaultPadding / 2),
+              child: FutureBuilder<String>(
+                future: _loadUserId(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Text(snapshot.data ?? '');
+                  } else {
+                    return CircularProgressIndicator();
+                  }
+                },
+              ),
             ),
-
         ],
       ),
     );
   }
-}
 
+  Future<String> _loadUserId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    
+    return "USER :  ${prefs.getString('userid')?.toUpperCase()}" ?? '';
+  }
+}

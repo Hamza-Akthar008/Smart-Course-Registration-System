@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_course_registration_system/screens/dashboard/dashboard_screenStudent.dart';
+
 import 'package:smart_course_registration_system/screens/main/components/side_menuStudent.dart';
 
 import '../../controllers/MenuAppController.dart';
@@ -9,12 +9,15 @@ import '../../responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class MainScreenStudentStudent extends StatefulWidget {
+import '../dashboard/dashboard_screenhod.dart';
+import 'components/side_menuHod.dart';
+
+class MainScreenHOD extends StatefulWidget {
   @override
-  MainScreenStudent createState() => MainScreenStudent();
+  _MainScreenHOD createState() => _MainScreenHOD();
 }
 
-class MainScreenStudent extends State<MainScreenStudentStudent> {
+class _MainScreenHOD extends State<MainScreenHOD> {
   List<Map<String, dynamic>> batches = [];
 
   void initState() {
@@ -30,10 +33,10 @@ class MainScreenStudent extends State<MainScreenStudentStudent> {
       'Authorization': '${token}',
       'Content-Type': 'application/json',
     };
-    final data = {'student_id': userId};
+    final data = {'HODID': userId};
 
     final response = await http.post(
-      Uri.parse('http://localhost:5000/managestudentrecords/get_student'),
+      Uri.parse('http://localhost:5000/managehod/get_hod'),
       headers: headers,
       body: json.encode(data),
     );
@@ -56,12 +59,12 @@ class MainScreenStudent extends State<MainScreenStudentStudent> {
 
     return Scaffold(
       key: context.read<MenuAppController>().scaffoldKey,
-      drawer: SideMenuStudent(),
+      drawer: SideMenuHOD(),
       body: SafeArea(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (Responsive.isDesktop(context)) SideMenuStudent(),
+            if (Responsive.isDesktop(context)) SideMenuHOD(),
             Expanded(
               child: SingleChildScrollView(
                 child: Container(
@@ -69,7 +72,7 @@ class MainScreenStudent extends State<MainScreenStudentStudent> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      DashboardScreenStudent(parameter: "Dashboard"),
+                      DashboardScreenHOD(parameter: "Dashboard"),
                       SizedBox(height: 20),
                       Container(
                         width: double.infinity, // Take full width
@@ -112,7 +115,7 @@ class MainScreenStudent extends State<MainScreenStudentStudent> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Roll No:',
+                              'HOD ID:',
                               style: TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.w900,
@@ -121,7 +124,7 @@ class MainScreenStudent extends State<MainScreenStudentStudent> {
                             SizedBox(height: 8),
                             if (batches.isNotEmpty)
                               Text(
-                                batches[0]['student_id'].toString(),
+                                batches[0]['HODID'].toString(),
                                 style: TextStyle(color: Colors.black),
                               ),
                             SizedBox(height: 16),
@@ -135,7 +138,7 @@ class MainScreenStudent extends State<MainScreenStudentStudent> {
                             SizedBox(height: 8),
                             if (batches.isNotEmpty)
                               Text(
-                                batches[0]['student_name'].toString(),
+                                batches[0]['Hod_name'].toString(),
                                 style: TextStyle(color: Colors.black),
                               ),
                             SizedBox(height: 16),
@@ -149,7 +152,7 @@ class MainScreenStudent extends State<MainScreenStudentStudent> {
                             SizedBox(height: 8),
                             if (batches.isNotEmpty)
                               Text(
-                                batches[0]['student_email'].toString(),
+                                batches[0]['hod_email'].toString(),
                                 style: TextStyle(color: Colors.black),
                               ),
                             SizedBox(height: 16),
@@ -163,23 +166,11 @@ class MainScreenStudent extends State<MainScreenStudentStudent> {
                             SizedBox(height: 8),
                             if (batches.isNotEmpty)
                               Text(
-                                batches[0]['student_contact'].toString(),
+                                batches[0]['hod_contact'].toString(),
                                 style: TextStyle(color: Colors.black),
                               ),
                             SizedBox(height: 16),
-                            Text(
-                              'Batch:',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            if (batches.isNotEmpty)
-                              Text(
-                                batches[0]['batch_id'].toString(),
-                                style: TextStyle(color: Colors.black),
-                              ),
+
                             SizedBox(height: 16),
                             Text(
                               'Department:',
@@ -195,19 +186,7 @@ class MainScreenStudent extends State<MainScreenStudentStudent> {
                                 style: TextStyle(color: Colors.black),
                               ),
                             SizedBox(height: 16),
-                            Text(
-                              'Address:',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            if (batches.isNotEmpty)
-                              Text(
-                                batches[0]['student_address'].toString(),
-                                style: TextStyle(color: Colors.black),
-                              ),
+
                           ],
                         ),
                       ),

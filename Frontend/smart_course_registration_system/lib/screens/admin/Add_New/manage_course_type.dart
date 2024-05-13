@@ -1,22 +1,21 @@
 import 'dart:convert';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../controllers/MenuAppController.dart';
-import '../dashboard/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../../responsive.dart';
-import '../Component/Editabledata.dart';
-import '../main/components/side_menu.dart'; // Adjust the import path
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../controllers/MenuAppController.dart';
+import '../../../responsive.dart';
+import '../../Component/Editabledata.dart';
+import '../../dashboard/dashboard_screen.dart';
+import '../../main/components/side_menu.dart';
 
-class ManageHOD extends StatefulWidget {
+class ManageCourseType extends StatefulWidget {
   @override
-  _ManageHODState createState() => _ManageHODState();
+  _ManageCourseTypeState createState() => _ManageCourseTypeState();
 }
 
-class _ManageHODState extends State<ManageHOD> {
-  List<Map<String, dynamic>> batchAdvisors = [];
+class _ManageCourseTypeState extends State<ManageCourseType> {
+  List<Map<String, dynamic>> batches = [];
 
   @override
   void initState() {
@@ -26,7 +25,7 @@ class _ManageHODState extends State<ManageHOD> {
   }
 
   Future<void> fetchData() async {
-    final url = 'http://localhost:5000/managehod/get_all_hod';
+    final url = 'http://localhost:5000/managecoursetype/getallcoursetype';
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString('token');
     final Map<String, String> headers = {
@@ -43,12 +42,10 @@ class _ManageHODState extends State<ManageHOD> {
         // If the server returns a 200 OK response, parse the JSON
         final Map<String, dynamic> responseData = json.decode(response.body);
         // Assuming your data is under a key like 'data'
-        final List<dynamic> hodsData = responseData['data'];
+        final List<dynamic> batchData = responseData['data'];
 
         setState(() {
-
-          batchAdvisors = List<Map<String, dynamic>>.from(hodsData);
-
+          batches = List<Map<String, dynamic>>.from(batchData);
         });
       } else {
         // If the server did not return a 200 OK response,
@@ -61,7 +58,6 @@ class _ManageHODState extends State<ManageHOD> {
     }
   }
 
-  @override
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,7 +80,7 @@ class _ManageHODState extends State<ManageHOD> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    DashboardScreen(parameter: "Manage HOD"),
+                    DashboardScreen(parameter: "Manage Course Type"),
                     SizedBox(height: 20),
                     Padding(
                       padding: EdgeInsets.only(right: 30.0),
@@ -92,21 +88,21 @@ class _ManageHODState extends State<ManageHOD> {
                         alignment: Alignment.centerRight,
                         child: ElevatedButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, '/add_new_hod');
+                            Navigator.pushNamed(context, '/add_new_course_type');
                           },
                           style: ButtonStyle(
                             backgroundColor: MaterialStateProperty.all<Color>(Color(0xFF334155)),
                           ),
-                          child: Text('Add New HOD'),
+                          child: Text('Add New Course Type'),
                         ),
                       ),
                     ),
                     EditableDataTable(
-                      headers: ['HODID', 'depart_id', 'Hod_name', 'hod_contact', 'hod_email','Edit','Delete'],
-                      data: batchAdvisors,
-                      deleteurl: 'http://localhost:5000/managehod/delete_hod',
-                      editurl:'http://localhost:5000/managehod/edit_hod',
-                      redirect:'/manage_hod'
+                      headers: ['Course_Type_id','Course_Type_name', 'Edit', 'Delete'],
+                      data: batches,
+                      deleteurl: 'http://localhost:5000/managecoursetype/delete_coursetype',
+                      editurl: 'http://localhost:5000/managecoursetype/edit_coursetype',
+                      redirect: '/manage_degree',
                     ),
                   ],
                 ),
@@ -117,5 +113,4 @@ class _ManageHODState extends State<ManageHOD> {
       ),
     );
   }
-
 }

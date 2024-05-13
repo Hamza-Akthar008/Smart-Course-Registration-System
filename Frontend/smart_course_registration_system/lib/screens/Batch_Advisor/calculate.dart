@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
+
 import 'dart:convert';
 import 'dart:io';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:smart_course_registration_system/screens/main/components/side_menu_advisor.dart';
+
 import '../../controllers/MenuAppController.dart';
 import '../../responsive.dart';
 import '../dashboard/dashboard_screenStudent.dart';
 import '../main/components/side_menuStudent.dart';
-import 'package:flutter/foundation.dart' show Uint8List, kIsWeb;
+
 import 'package:http/http.dart' as http;
 
-class UploadTranscript extends StatefulWidget {
+class CalculateStudentCGPA extends StatefulWidget {
   @override
-  _UploadTranscriptState createState() => _UploadTranscriptState();
+  _CalculateState createState() => _CalculateState();
 }
 
 class SemesterDetails {
@@ -23,7 +25,7 @@ class SemesterDetails {
   SemesterDetails({required this.semester, required this.courses});
 }
 
-class _UploadTranscriptState extends State<UploadTranscript> {
+class _CalculateState extends State<CalculateStudentCGPA> {
   File? pdfFile;
   bool uploading = false;
   String message = '';
@@ -31,31 +33,12 @@ class _UploadTranscriptState extends State<UploadTranscript> {
   List<int> bytes = [];
   bool isLoading = true;
   List<SemesterDetails> semesterDetailsList = [];
-
+  bool isGPAButtonClicked = false;
+  String searchText = '';
   @override
   void initState() {
     super.initState();
-    getTranscript();
-  }
-
-  void selectPdfFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf'],
-    );
-    if (result != null) {
-      if (kIsWeb) {
-        filepath = result.files.first.name;
-        bytes = result.files.first.bytes!;
-        pdfFile = File.fromRawPath(Uint8List.fromList(bytes));
-      } else {
-        pdfFile = File(result.files.single.path!);
-      }
-
-      setState(() {
-        message = '';
-      });
-    }
+   
   }
 
   double calculateSGPA(String grade) {
@@ -87,8 +70,6 @@ class _UploadTranscriptState extends State<UploadTranscript> {
     }
   }
 
-
-
   List<double> calculateSemesterGPA(List<Map<String, String>> semesterCourses, double totalcredithours, double totalgradepoints) {
     double totalGradePoints = 0.0;
     int totalCreditHours = 0;
@@ -110,73 +91,6 @@ class _UploadTranscriptState extends State<UploadTranscript> {
 
     return [totalCreditHours > 0 ? totalGradePoints / totalCreditHours : 0.0,totalgradepoints,totalcredithours];
   }
-  Future<void> uploadTranscripts() async {
-    if (pdfFile == null) {
-      setState(() {
-        message = 'No transcript selected to upload.';
-      });
-      return;
-    }
-
-    setState(() {
-      uploading = true;
-    });
-
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String userId = prefs.getString('userid') ?? '';
-
-      var request = http.MultipartRequest(
-        'POST',
-        Uri.parse('http://localhost:5000/upload'),
-      );
-      print(userId);
-      request.fields['student_id'] = userId;
-
-      if (kIsWeb) {
-        request.fields['type'] = "web";
-
-        String base64String = base64Encode(bytes);
-        request.fields['base64String'] = base64String;
-        request.files.add(http.MultipartFile.fromString(
-          'file',
-          base64String,
-          filename: 'transcript.pdf',
-        ));
-      } else {
-        request.fields['type'] = "app";
-        request.files.add(await http.MultipartFile.fromPath(
-          'file',
-          pdfFile!.path,
-          filename: 'transcript.pdf',
-        ));
-      }
-
-      var response = await request.send();
-
-      if (response.statusCode == 200) {
-        var responseBody = await response.stream.bytesToString();
-        var jsonData = jsonDecode(responseBody);
-
-        setState(() {
-          message = jsonData['message'];
-        });
-      } else {
-        setState(() {
-          message = 'Response Body: ${response.stream.bytesToString()}';
-        });
-      }
-    } catch (error) {
-      setState(() {
-        message = 'Error during file upload: $error';
-        print(message);
-      });
-    } finally {
-      setState(() {
-        uploading = false;
-      });
-    }
-  }
 
   List<Map<String, dynamic>> Transcriptdetailinfo = [];
 
@@ -187,14 +101,14 @@ class _UploadTranscriptState extends State<UploadTranscript> {
   void getTranscript() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String token = prefs.getString('token') ?? '';
-    final String student_id = prefs.getString('userid') ?? '';
+
     final Map<String, String> headers = {
       'Authorization': '$token',
       'Content-Type': 'application/json',
     };
 
     final Map<String, dynamic> requestData = {
-      'student_id': student_id,
+      'student_id': searchText,
     };
     final http.Response response = await http.post(
       Uri.parse(
@@ -242,50 +156,34 @@ class _UploadTranscriptState extends State<UploadTranscript> {
     }
   }
 
-  Widget _buildSelectedPDFName() {
-    return pdfFile != null
-        ? Text(
-      'Selected PDF: $filepath',
-      style: TextStyle(
-        fontSize: 18,
-        color: Colors.black,
-      ),
-    )
-        : Container();
-  }
-
   Widget _buildSemesterTable() {
     if (isLoading) {
-      // If data is still loading, display a loading indicator
-      return CircularProgressIndicator();
+      return  CircularProgressIndicator();
     }
 
-    double totalcredithours=0;
-    double totalgradepoints=0;
+    double totalcredithours = 0;
+    double totalgradepoints = 0;
     int start = 0;
-    double cgpa=0;
+    double cgpa = 0;
     return Column(
       children: semesterDetailsList.map((semesterDetails) {
-        // Get the courses for the current semester
-        List<Map<String, String>> semesterCourses = TranscriptInfo
-            .sublist(start, start + semesterDetails.courses);
+        List<Map<String, String>> semesterCourses =
+        TranscriptInfo.sublist(start, start + semesterDetails.courses);
         start += semesterDetails.courses;
-        List<double> data  = calculateSemesterGPA(semesterCourses,totalcredithours,totalgradepoints);
-        totalcredithours=data[2];
-        totalgradepoints=data[1];
-        double eachgpa=0.00;
-        if(data[0]!=0.00)
-          {
-            cgpa += data[0]*data[2];
-            print("Total CreditHours : ${data[2]}");
-            print("CGPA : ${cgpa}" );
-            print("Total Grade Point : ${data[1]}");
-             eachgpa = cgpa/data[1];
-          }
-        else
-          {
-            eachgpa = cgpa/data[1];
-          }
+        List<double> data =
+        calculateSemesterGPA(semesterCourses, totalcredithours, totalgradepoints);
+        totalcredithours = data[2];
+        totalgradepoints = data[1];
+        double eachgpa = 0.00;
+        if (data[0] != 0.00) {
+          cgpa += data[0] * data[2];
+          print("Total CreditHours : ${data[2]}");
+          print("CGPA : ${cgpa}");
+          print("Total Grade Point : ${data[1]}");
+          eachgpa = cgpa / data[1];
+        } else {
+          eachgpa = cgpa / data[1];
+        }
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -293,10 +191,10 @@ class _UploadTranscriptState extends State<UploadTranscript> {
             SizedBox(height: 20),
             Container(
               decoration: BoxDecoration(
-                color: Colors.white70, // Choose your desired background color
+                color: Colors.white70,
                 borderRadius: BorderRadius.circular(8.0),
                 border: Border.all(
-                  color: Colors.black, // Choose your desired border color
+                  color: Colors.black,
                   width: 2.0,
                 ),
               ),
@@ -323,29 +221,39 @@ class _UploadTranscriptState extends State<UploadTranscript> {
                 ],
               ),
             ),
-
             PaginatedSemesterTableWidget(
               courses: semesterCourses,
               semseter: semesterDetails.semester,
+              isGPAButtonClicked: isGPAButtonClicked,
+              onUpdateGrade: (grade,index) {
+                updateGrade(semesterCourses, grade,index);
+              },
             ),
-
           ],
         );
       }).toList(),
     );
   }
+  void updateGrade(List<Map<String, String>> semesterCourses, String grade,int index) {
+    setState(() {
+     semesterCourses[index]['grade']=grade;
+    });
+  }
+
+  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: context.read<MenuAppController>().scaffoldKey,
-      drawer: SideMenuStudent(),
+      drawer: SideMenuAdvisor(),
       body: SafeArea(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (Responsive.isDesktop(context))
               Expanded(
-                child: SideMenuStudent(),
+                child: SideMenuAdvisor(),
               ),
             Expanded(
               flex: 5,
@@ -355,65 +263,35 @@ class _UploadTranscriptState extends State<UploadTranscript> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     DashboardScreenStudent(
-                        parameter: "Upload Transcript"),
+                      parameter: "Calulate Student CGPA",
+                    ),
                     SizedBox(height: 20),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
                         children: [
-                          _buildSelectedPDFName(),
                           SizedBox(height: 20.0),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              MaterialButton(
-                                color: Colors.blue,
-                                elevation: 2.0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.file_upload,
-                                        color: Colors.white),
-                                    SizedBox(width: 8.0),
-                                    Text(
-                                      'Pick Your Transcript',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                onPressed: selectPdfFile,
-                              ),
-                              MaterialButton(
-                                color: Colors.green,
-                                elevation: 2.0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.upload_file,
-                                        color: Colors.white),
-                                    SizedBox(width: 8.0),
-                                    Text(
-                                      'Upload Transcripts',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                onPressed: uploadTranscripts,
-                              ),
-                            ],
+                          TextField(
+                            onChanged: (value) {
+                              setState(() {
+                                searchText = value;
+                              });
+
+                            },
+                            decoration: InputDecoration(
+                              labelText: 'Search by Roll No',
+                              prefixIcon: Icon(Icons.search),
+                              prefixStyle: TextStyle(color: Colors.black)
+                            ),
+                        style: TextStyle(color: Colors.black),  ),
+                          SizedBox(height: 20.0),
+                          ElevatedButton(
+                            onPressed: () {
+                              getTranscript();
+                            },
+                            child: Text('Get Transcript'),
                           ),
+
                           SizedBox(height: 20.0),
                           _buildSemesterTable(),
                         ],
@@ -433,38 +311,48 @@ class _UploadTranscriptState extends State<UploadTranscript> {
 class PaginatedSemesterTableWidget extends StatelessWidget {
   final List<Map<String, String>> courses;
   String semseter;
-  PaginatedSemesterTableWidget(
-      {required this.courses, required this.semseter});
+  bool isGPAButtonClicked;
+  Function(String,dynamic) onUpdateGrade;
+  dynamic index;
+
+  PaginatedSemesterTableWidget({
+    required this.courses,
+    required this.semseter,
+    required this.isGPAButtonClicked,
+    required this.onUpdateGrade,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return  Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [ Theme(
-        data: ThemeData(
-        dataTableTheme: DataTableThemeData(
-        dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
-    headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF334155)),
-    decoration: BoxDecoration(
-    border: Border.all(color: Colors.black),
-    borderRadius: BorderRadius.circular(20),
-    color: Color(0xFFE5E7EB),
-    ),
-    dataTextStyle: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.bold),
-    headingTextStyle: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-    ),
-    ),
-    child: PaginatedDataTable(
+        children: [
+          Theme(
+            data: ThemeData(
+              dataTableTheme: DataTableThemeData(
+                dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
+                headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF334155)),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black),
+                  borderRadius: BorderRadius.circular(20),
+                  color: Color(0xFFE5E7EB),
+                ),
+                dataTextStyle: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.bold),
+                headingTextStyle: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),  child:  PaginatedDataTable(
       header: Text('${semseter}'),
       rowsPerPage: courses.length,
       columns: [
         DataColumn(label: Text('Course ID')),
         DataColumn(label: Text('Course Name')),
-        DataColumn(label: Text('Grade')),
+        DataColumn(
+          label: Text(isGPAButtonClicked ? 'GPA' : 'Grade'),
+        ),
         DataColumn(label: Text('Section')),
-        DataColumn(label: Text('credit hours')),
+        DataColumn(label: Text('Credit Hours')),
       ],
-      source: _SemesterDataSource(courses),
+      source: _SemesterDataSource(courses,isGPAButtonClicked,onUpdateGrade,index),
     ),
     ),
     ],
@@ -474,8 +362,10 @@ class PaginatedSemesterTableWidget extends StatelessWidget {
 
 class _SemesterDataSource extends DataTableSource {
   final List<Map<String, String>> _courses;
+  final bool isGPAButtonClicked;
+  final Function(String,dynamic) onUpdateGrade;
 
-  _SemesterDataSource(this._courses);
+  _SemesterDataSource(this._courses, this.isGPAButtonClicked, this.onUpdateGrade, index);
 
   @override
   DataRow getRow(int index) {
@@ -483,9 +373,25 @@ class _SemesterDataSource extends DataTableSource {
     return DataRow(cells: [
       DataCell(Text(course['courseId'] ?? '')),
       DataCell(Text(course['Course_Name'] ?? '')),
-      DataCell(Text(course['grade'] ?? '')),
+      DataCell(
+        isGPAButtonClicked
+            ? Text(course['grade'] ?? '')
+            : DropdownButtonFormField<String>(
+          value: course['grade'] ?? '',
+          items: ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D','']
+              .map((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+          onChanged: (String? newValue,) {
+            onUpdateGrade(newValue ?? '',index);
+          },
+        ),
+      ),
       DataCell(Text(course['section'] ?? '')),
-      DataCell(Text(course['creditHours']  ??  'null')),
+      DataCell(Text(course['creditHours'] ?? 'null')),
     ]);
   }
 

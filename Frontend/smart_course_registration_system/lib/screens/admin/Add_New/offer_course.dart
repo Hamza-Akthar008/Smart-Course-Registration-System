@@ -4,65 +4,118 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smart_course_registration_system/screens/Component/Editabledata.dart';
 import '../../../controllers/MenuAppController.dart';
 import '../../../responsive.dart';
 import '../../dashboard/dashboard_screen.dart';
 import '../../main/components/side_menu.dart';
-class AddNewCourse extends StatefulWidget {
+
+class AddNewCourseOffering extends StatefulWidget {
   @override
-  _AddNewCourseState createState() => _AddNewCourseState();
+  _AddNewCourseOfferingState createState() => _AddNewCourseOfferingState();
 }
-class _AddNewCourseState extends State<AddNewCourse> {
-  final TextEditingController courseIdController = TextEditingController();
-  final TextEditingController courseNameController = TextEditingController();
-  final TextEditingController courseDescriptionController = TextEditingController();
-  String? selectedCourseType;
-String? selectedCoursePreReg;
-  Future<void> _addNewCourse() async {
-    final url = Uri.parse('http://localhost:5000/managecourse/addNewCourse');
+
+class _AddNewCourseOfferingState extends State<AddNewCourseOffering> {
+  final TextEditingController sectionController = TextEditingController();
+  final TextEditingController semesterController = TextEditingController();
+  String? selectedDepartment;
+  String? selectedCourseName;
+  int? semester;
+  List<Map<String, dynamic>> batches = [];
+  final List<Map<String, dynamic>> mergedData = [];
+  @override
+  void initState() {
+    super.initState();
+    // Call the method to fetch data when the widget is first created
+    fetchData();
+  }
+  Future<void> fetchData() async {
+    final url = 'http://localhost:5000/offercourse/getallcourseofferings';
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString('token');
     final Map<String, String> headers = {
       'Authorization': '${token}',
       'Content-Type': 'application/json', // Add any other headers you need
     };
-    // Create a map with your course data
-    final Map<String, dynamic> courseData = {
-      'CourseID': courseIdController.text,
-      'Course_Name': courseNameController.text,
-      'Course_Type': selectedCourseType,
-      'Course_Pre_reg':selectedCoursePreReg,
-      'Course_Description': courseDescriptionController.text,
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        // If the server returns a 200 OK response, parse the JSON
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        // Assuming your data is under a key like 'data'
+        final List<dynamic> batchData = responseData['data'];
+        final List<dynamic> coursename = responseData['course_name'];
+        setState(() {
+          batches = List<Map<String, dynamic>>.from(batchData);
+
+            for (int i = 0; i < batches.length; i++) {
+              final Map<String, dynamic> mergedItem = {
+                "Course_Name": coursename[i],
+               "section": batches[i]["Semester"] + batches[i]["section"],
+                "depart_id": batches[i]["depart_id"],
+                "CourseID": batches[i]["CourseID"],
+                "offering": batches[i]["offering"],
+
+
+              };
+
+              mergedData.add(mergedItem);
+
+        }
+            batches=mergedData;
+
+        });
+      } else {
+        // If the server did not return a 200 OK response,
+        // throw an exception.
+        throw Exception('Failed to load data');
+      }
+    } catch (error) {
+      // Handle errors
+      print('Error fetching data: $error');
+    }
+  }
+
+  Future<void> _addNewCourseOffering() async {
+    final url = Uri.parse('http://localhost:5000/offercourse/add_new_courseofferings');
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('token');
+    final Map<String, String> headers = {
+      'Authorization': '${token}',
+      'Content-Type': 'application/json',
     };
 
-    // Make a POST request to add a new course
+    final Map<String, dynamic> courseOfferingData = {
+      'CourseID': selectedCourseName,
+      'section': sectionController.text,
+      'Semester': semesterController.text,
+      'depart_id':selectedDepartment
+    };
+
     final response = await http.post(
       url,
       headers: headers,
-      body: jsonEncode(courseData),
+      body: jsonEncode(courseOfferingData),
     );
 
-    // Check the response status
     if (response.statusCode == 200) {
-      // Course added successfully
-      showLoginSuccessToast('Course added successfully');
-      // You might want to navigate to another screen or show a success message
+      showLoginSuccessToast('Course offering added successfully');
     } else {
-      // Failed to add the course
       final Map<String, dynamic> responseData = json.decode(response.body);
-
-
-
       showLoginFailedToast('${responseData['message']}');
-      // You might want to show an error message
     }
   }
+
   void showLoginFailedToast(String message) {
     Fluttertoast.showToast(
       msg: message,
       toastLength: Toast.LENGTH_LONG,
       gravity: ToastGravity.BOTTOM,
-      backgroundColor: Colors.red, // Red color for failure
+      backgroundColor: Colors.red,
       textColor: Colors.white,
       timeInSecForIosWeb: 3,
     );
@@ -73,12 +126,14 @@ String? selectedCoursePreReg;
       msg: message,
       toastLength: Toast.LENGTH_LONG,
       gravity: ToastGravity.BOTTOM,
-      backgroundColor: Colors.green, // Green color for success
+      backgroundColor: Colors.green,
       textColor: Colors.white,
       timeInSecForIosWeb: 3,
     );
   }
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,9 +155,23 @@ String? selectedCoursePreReg;
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      DashboardScreen(parameter: "Add New Course "),
+                      DashboardScreen(parameter: "Offer-Course"),
                       SizedBox(height: 20),
-                      _buildAddCourseForm(),
+                      _buildAddCourseOfferingForm(),
+                      SizedBox(height: 50),
+                      Text(
+
+                        "LIST OF OFFERED COURSES",
+                        style: Theme.of(context).textTheme.titleLarge!.copyWith(color: Colors.black),
+                      ),
+                      SizedBox(height: 50),
+                      EditableDataTable(
+                        headers: ['CourseID','Course_Name','section','depart_id','offering','UnOffer'],
+                        data: batches,
+                        deleteurl: 'http://localhost:5000/offercourse/delete_courseofferings',
+                        editurl: 'http://localhost:5000/offercourse/edit_coursetype',
+                        redirect: '/manage_degree',
+                      ),
                     ],
                   ),
                 ),
@@ -113,74 +182,13 @@ String? selectedCoursePreReg;
       ),
     );
   }
-  Widget _buildAddCourseForm() {
+
+  Widget _buildAddCourseOfferingForm() {
     return Form(
       key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildValidatedTextField(
-            controller: courseIdController,
-            labelText: 'Course ID',
-            validator: (value) {
-              if (value!.isEmpty) {
-                return 'Please enter Course ID';
-              }
-              return null;
-            },
-            prefixIcon: Icons.text_fields,
-          ),
-          SizedBox(height: 16),
-          _buildValidatedTextField(
-            controller: courseNameController,
-            labelText: 'Course Name',
-            validator: (value) {
-              if (value!.isEmpty) {
-                return 'Please enter Course Name';
-              }
-              return null;
-            },
-            prefixIcon: Icons.text_fields,
-          ),
-          SizedBox(height: 16),
-     FutureBuilder<List<String>>(
-            future: fetchcoursetypeIds(),
-            builder: (context, AsyncSnapshot<List<String>> snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator();
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return Text('No data found');
-              } else {
-                List<String> courseTypes = snapshot.data!;
-                return _buildDropdownButton(
-                  label: 'Course Type',
-                  controller: selectedCourseType,
-                  defaultValue: 'Select Course Type',
-                  prefixIcon: Icons.school,
-                  items: courseTypes.map((type) {
-                    return DropdownMenuItem(
-                      value: type,
-                      child: Row(
-                        children: [
-                          Icon(Icons.school, color: Colors.black),
-                          SizedBox(width: 8),
-                          Text(type, style: TextStyle(color: Colors.black)),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                 selectedCourseType = value ?? '';
-                    });
-                  },
-                );
-              }
-            },
-          ),
-          SizedBox(height: 16),
           FutureBuilder<List<String>>(
             future: fetchcourseName(),
             builder: (context, AsyncSnapshot<List<String>> snapshot) {
@@ -191,27 +199,20 @@ String? selectedCoursePreReg;
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return Text('No data found');
               } else {
-                List<String> coursePreRegOptions = snapshot.data!;
+                List<String> courseNames = snapshot.data!;
                 return _buildDropdownButton(
-                  label: 'Course Pre-Reg',
-                  controller: selectedCoursePreReg,
-                  defaultValue: 'Select Course Pre-Reg',
-                  prefixIcon: Icons.school, // Change the icon as needed
-                  items: coursePreRegOptions.map((option) {
+                  label: 'Course Name',
+                  controller: selectedCourseName,
+                  defaultValue: 'Select Course Name',
+                  items: courseNames.map((name) {
                     return DropdownMenuItem(
-                      value: option,
-                      child: Row(
-                        children: [
-                          Icon(Icons.school, color: Colors.black),
-                          SizedBox(width: 8),
-                          Text(option, style: TextStyle(color: Colors.black)),
-                        ],
-                      ),
+                      value: name,
+                      child: Text(name, style: TextStyle(color: Colors.black)),
                     );
                   }).toList(),
                   onChanged: (value) {
                     setState(() {
-                      selectedCoursePreReg = value ?? '';
+                      selectedCourseName = value ?? '';
                     });
                   },
                 );
@@ -219,13 +220,59 @@ String? selectedCoursePreReg;
             },
           ),
           SizedBox(height: 16),
-          _buildTextArea(
-            controller: courseDescriptionController,
-            labelText: 'Course Description',
+          FutureBuilder<List<String>>(
+            future: fetchDepartIds(), // Add a function to fetch department names
+            builder: (context, AsyncSnapshot<List<String>> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return Text('No data found');
+              } else {
+                List<String> departments = snapshot.data!;
+                return _buildDropdownButton(
+                  label: 'Department',
+                  controller: selectedDepartment,
+                  defaultValue: 'Select Department',
+                  items: departments.map((department) {
+                    return DropdownMenuItem(
+                      value: department,
+                      child: Text(department, style: TextStyle(color: Colors.black)),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedDepartment = value ?? '';
+                    });
+                  },
+                );
+              }
+            },
+          ),
+          SizedBox(height: 16),
+          _buildValidatedTextField(
+            controller: sectionController,
+            labelText: 'Section',
             validator: (value) {
               if (value!.isEmpty) {
-                return 'Please enter Course Description';
+                return 'Please enter Section';
               }
+
+              return null;
+            },
+            prefixIcon: Icons.text_fields,
+          ),
+          SizedBox(height: 16),
+          _buildValidatedTextField(
+            controller: semesterController,
+            labelText: 'Semester',
+            validator: (value) {
+              if (value!.isEmpty) {
+                return 'Please enter Semester';
+              }
+              // Add any additional validation for Semester (e.g., only numbers, not less than 1)
+              // You can use regular expressions or other validation methods.
               return null;
             },
             prefixIcon: Icons.text_fields,
@@ -234,7 +281,7 @@ String? selectedCoursePreReg;
           ElevatedButton(
             onPressed: () {
               if (_formKey.currentState!.validate()) {
-                _addNewCourse();
+                _addNewCourseOffering();
               }
             },
             style: ButtonStyle(
@@ -259,20 +306,13 @@ String? selectedCoursePreReg;
     required String label,
     required String? controller,
     String defaultValue = '',
-    IconData? prefixIcon,
     List<DropdownMenuItem<String>> items = const [],
     ValueChanged<String?>? onChanged,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            if (prefixIcon != null)
-              Icon(prefixIcon, color: Colors.black),
-            Text(label, style: TextStyle(color: Colors.black)),
-          ],
-        ),
+        Text(label, style: TextStyle(color: Colors.black)),
         DropdownButtonFormField<String>(
           value: controller != null && controller.isNotEmpty ? controller : null,
           onChanged: onChanged,
@@ -282,44 +322,11 @@ String? selectedCoursePreReg;
             hintText: defaultValue,
             hintStyle: TextStyle(color: Colors.black),
           ),
-
         ),
       ],
     );
   }
-  Widget _buildTextArea({
-    required TextEditingController controller,
-    required String labelText,
-    String? Function(String?)? validator,
-    IconData? prefixIcon,
-  }) {
-    return TextFormField(
-      controller: controller,
-      maxLines: null,
-      style: TextStyle(color: Colors.black),
-      decoration: InputDecoration(
-        labelText: labelText,
-        labelStyle: TextStyle(color: Colors.black),
-        prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: Colors.black) : null,
-        suffixIcon: _buildValidationIcon(controller.text, validator),
-      ),
-      keyboardType: TextInputType.multiline,
-      onChanged: (value) {
-        setState(() {});
-      },
-      validator: validator,
-    );
-  }
 
-  Widget _buildValidationIcon(String text, String? Function(String?)? validator) {
-    if (text.isEmpty) {
-      return SizedBox.shrink();
-    }
-    return Icon(
-      validator?.call(text) == null ? Icons.check : Icons.clear,
-      color: validator?.call(text) == null ? Colors.green : Colors.red,
-    );
-  }
   Widget _buildValidatedTextField({
     required TextEditingController controller,
     required String labelText,
@@ -342,26 +349,14 @@ String? selectedCoursePreReg;
     );
   }
 
-  Future<List<String>> fetchcoursetypeIds() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString('token');
-    final Map<String, String> head = {
-      'Authorization': '${token}',
-      'Content-Type': 'application/json',
-    };
-    final response = await http.get(
-      Uri.parse('http://localhost:5000/managecoursetype/getallcoursetypeid'),
-      headers: head,
-    );
-
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> responseData = json.decode(response.body);
-      final List<dynamic> data = responseData['data'];
-      List<String> coursetype = data.map((item) => item.toString()).toList();
-      return coursetype;
-    } else {
-      throw Exception('Failed to load batch_ids');
+  Widget _buildValidationIcon(String text, String? Function(String?)? validator) {
+    if (text.isEmpty) {
+      return SizedBox.shrink();
     }
+    return Icon(
+      validator?.call(text) == null ? Icons.check : Icons.clear,
+      color: validator?.call(text) == null ? Colors.green : Colors.red,
+    );
   }
 
   Future<List<String>> fetchcourseName() async {
@@ -385,4 +380,28 @@ String? selectedCoursePreReg;
       throw Exception('Failed to load batch_ids');
     }
   }
+
+  Future<List<String>> fetchDepartIds() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('token');
+    final Map<String, String> head = {
+      'Authorization': '${token}',
+      'Content-Type': 'application/json',
+    };
+    final response = await http.get(
+      Uri.parse('http://localhost:5000/managedepart/getalldepartid'),
+      headers: head,
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      final List<dynamic> data = responseData['data'];
+      List<String> departIds =
+      data.map((item) => item.toString()).toList();
+      return departIds;
+    } else {
+      throw Exception('Failed to load depart_ids');
+    }
+  }
 }
+

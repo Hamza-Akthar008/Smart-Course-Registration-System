@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-class SideMenuStudent extends StatelessWidget {
-  const SideMenuStudent({
+class SideMenuAdvisor extends StatelessWidget {
+  const SideMenuAdvisor({
     Key? key,
   }) : super(key: key);
 
@@ -17,45 +17,37 @@ class SideMenuStudent extends StatelessWidget {
           DrawerListTile(
             title: "Dashboard",
             svgSrc: "assets/icons/menu_dashboard.svg",
-            press: () { Navigator.pushNamed(context, '/dashboardstudent');},
+            press: () { Navigator.pushNamed(context, '/dashboardHOD');},
           ),
           DrawerListTile(
-            title: "UploadTranscript",
+            title: "View Applications",
             svgSrc: "assets/icons/menu_tran.svg",
             press: () {
-              Navigator.pushNamed(context, '/upload_transcript');
-            },
-          ),
-
-          DrawerListTile(
-            title: "Course Registeration",
-            svgSrc: "assets/icons/menu_tran.svg",
-            press: () {
-              Navigator.pushNamed(context, '/course_registration');
+              Navigator.pushNamed(context, '/view_application');
             },
           ),
           DrawerListTile(
-            title: "Check Application Status",
+            title: "View Available Courses",
             svgSrc: "assets/icons/menu_tran.svg",
             press: () {
-              Navigator.pushNamed(context, '/check_status');
+              Navigator.pushNamed(context, '/view_courses');
             },
-
+          ),
+          DrawerListTile(
+            title: "Schedule Meeting",
+            svgSrc: "assets/icons/menu_tran.svg",
+            press: () {
+              Navigator.pushNamed(context, '/schedule_meeting');
+            },
 
           ),
           DrawerListTile(
-            title: "Request Meeting",
+            title: "Calculate Student CGPA",
             svgSrc: "assets/icons/menu_tran.svg",
             press: () {
-              Navigator.pushNamed(context, '/request_meeting');
+              Navigator.pushNamed(context, '/calculate_student_cgpa');
             },
-          ),
-          DrawerListTile(
-            title: "Calculate CGPA",
-            svgSrc: "assets/icons/menu_tran.svg",
-            press: () {
-              Navigator.pushNamed(context, '/calculate');
-            },
+
           ),
           DrawerListTile(
             title: "Log out ",

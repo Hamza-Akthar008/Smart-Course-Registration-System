@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../responsive.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-class LoginScreen extends StatelessWidget {
+class ForgerPassword extends StatelessWidget {
   // Controllers for email, password, and OTP text fields
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -149,146 +149,32 @@ class LoginScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Email',
+              Text(
+                'Enter your email to reset password:',
                 style: TextStyle(
                   color: Color(0xFF334155),
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 10),
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: Colors.white,
+              SizedBox(height: 20),
+              TextField(
+                controller: emailController,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(),
+                  suffixStyle: TextStyle(color: Colors.black)
                 ),
-                child: TextField(
-                  controller: emailController,
-                  style: TextStyle(color: Color(0xFF334155)),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    prefixIcon: Icon(
-                      Icons.email,
-                      color: Color(0xFF334155),
-                    ),
-                    hintText: 'Email',
-                    hintStyle: TextStyle(color: Color(0xFF334155)),
-                  ),
-                ),
+                style: TextStyle(color: Colors.black),
               ),
-              const SizedBox(height: 15),
-              const Text(
-                'Password',
-                style: TextStyle(
-                  color: Color(0xFF334155),
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 15),
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: Colors.white,
-                ),
-                child: TextField(
-                  controller: passwordController,
-                  obscureText: true,
-                  style: TextStyle(color: Colors.black),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    prefixIcon: Icon(
-                      Icons.lock,
-                      color: Color(0xFF334155),
-                    ),
-                    hintText: 'Password',
-                    hintStyle: TextStyle(color: Colors.black),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 35),
-              // Check if OTP is required
-              if (isOTPRequired)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'OTP',
-                      style: TextStyle(
-                        color: Color(0xFF334155),
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: Colors.white,
-                      ),
-                      child: TextField(
-                        controller: otpController,
-                        style: TextStyle(color: Colors.black),
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          prefixIcon: Icon(
-                            Icons.vpn_key,
-                            color: Color(0xFF334155),
-                          ),
-                          hintText: 'Enter OTP',
-                          hintStyle: TextStyle(color: Colors.black),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              const SizedBox(height: 35),
-              Align(
-                alignment: Alignment.centerRight,
-                child: InkWell(
-                  onTap: () {
-                    // Navigate to the forgot password screen
-                    Navigator.pushNamed(context, "/forgot_password_request");
-                  },
-                  child: Text(
-                    'Forgot Password?',
-                    style: TextStyle(
-                      color: Colors.blue,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  performLogin(context);
+                },
+                child: Text('Submit'),
               ),
 
-              const SizedBox(height: 20),
-              MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: GestureDetector(
-                  onTap: () {
-                    performLogin(context);
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(30),
-                      color: Color(0xFF334155),
-                    ),
-                    child: const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(10.0),
-                        child: Text(
-                          ' Log In',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 30,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -296,29 +182,31 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
+
   Future<void> performLogin(BuildContext context) async {
     // Get email, password, and OTP from text fields
     final email = emailController.text;
-    final password = passwordController.text;
+
 
 
     // Ensure that email and password are not empty
-    if (email.isEmpty || password.isEmpty) {
-      showLoginFailedToast("Please provide email and password");
+    if (email.isEmpty ) {
+      showLoginFailedToast("Please provide email");
       return;
     }
 
     try {
       final response = await http.post(
-        Uri.parse('http://localhost:5000/auth/login'),
+        Uri.parse('http://localhost:5000/auth/reset_password_request'),
         headers: {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
           'staff_email': email,
-          'staff_password': password,
+
         }),
       );
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
         final bool otpRequired = responseData['otp'] || false;
@@ -327,28 +215,17 @@ class LoginScreen extends StatelessWidget {
         if (otpRequired) {
           final SharedPreferences prefs = await SharedPreferences.getInstance();
           prefs.setString('useremail', email);
-          print(email);
-Navigator.pushNamed(context, "/otp_screen");
+          showLoginFailedToast("OTP sent to email for verification.");
+          Navigator.pushNamed(context, "/forget_password");
+
+
+
         }
-        else
-          {
-            final String token = responseData['token'];
-            final String userType = responseData['userType'];
-            final String userid = responseData['userid'];
 
-            final SharedPreferences prefs = await SharedPreferences.getInstance();
-            prefs.setString('token', token);
-            prefs.setString('usertype', userType);
-            prefs.setString('userid', userid);
-
-            showLoginSuccessToast('${responseData['message']}');
-
-            Navigator.pushNamed(context, "/dashboard");
-          }
 
 
       } else {
-        showLoginFailedToast("Invalid credentials");
+        showLoginFailedToast("Invalid Email Address");
       }
     } catch (error) {
       print("Login failed: $error");

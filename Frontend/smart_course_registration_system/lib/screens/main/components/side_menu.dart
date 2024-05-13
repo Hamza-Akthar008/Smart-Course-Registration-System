@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 class SideMenu extends StatelessWidget {
   const SideMenu({
     Key? key,
@@ -11,12 +13,17 @@ class SideMenu extends StatelessWidget {
       child: ListView(
         children: [
           DrawerHeader(
-            child: Image.asset("assets/images/background.png",color: Colors.white,),
+            child: Image.asset(
+              "assets/images/background.png",
+              color: Colors.white,
+            ),
           ),
           DrawerListTile(
             title: "Dashboard",
             svgSrc: "assets/icons/menu_dashboard.svg",
-            press: () { Navigator.pushNamed(context, '/dashboard');},
+            press: () {
+              Navigator.pushNamed(context, '/dashboard');
+            },
           ),
           DrawerListTile(
             title: "Manage HOD",
@@ -54,14 +61,36 @@ class SideMenu extends StatelessWidget {
             },
           ),
           DrawerListTile(
-            title: "Profile",
-            svgSrc: "assets/icons/menu_profile.svg",
-            press: () {},
+            title: "Manage Department",
+            svgSrc: "assets/icons/menu_notification.svg",
+            press: () {
+              Navigator.pushNamed(context, '/manage_department');
+            },
           ),
           DrawerListTile(
-            title: "Settings",
-            svgSrc: "assets/icons/menu_setting.svg",
-            press: () {},
+            title: "Manage Batch",
+            svgSrc: "assets/icons/menu_notification.svg",
+            press: () {
+              Navigator.pushNamed(context, '/managebatch');
+            },
+          ),
+          DrawerListTile(
+            title: "Manage Course Type",
+            svgSrc: "assets/icons/menu_notification.svg",
+            press: () {
+              Navigator.pushNamed(context, '/manage_degree');
+            },
+          ),
+
+          DrawerListTile(
+            title: "Log out ",
+            svgSrc: "assets/icons/menu_tran.svg",
+            press: () async {
+              final SharedPreferences prefs = await SharedPreferences.getInstance();
+              prefs.clear();
+              Navigator.pushNamed(context, '/');
+            },
+
           ),
         ],
       ),

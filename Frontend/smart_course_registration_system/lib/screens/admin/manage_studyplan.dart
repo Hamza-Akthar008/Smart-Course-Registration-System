@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../controllers/MenuAppController.dart';
 import '../../responsive.dart';
 import '../Component/Editabledata.dart';
@@ -26,15 +27,20 @@ class _ManageStudyPlanState extends State<ManageStudyPlan> {
   }
 
    Future<void> getAllStudyPlans() async {
+     final SharedPreferences prefs = await SharedPreferences.getInstance();
+     final String? token = prefs.getString('token');
+     final Map<String, String> headers = {
+       'Authorization': '${token}',
+       'Content-Type': 'application/json', // Add any other headers you need
+     };
     try {
-      final response = await http.get(Uri.parse('http://localhost:5000/managestudyplan/gettallstudplans'));
+      final response = await http.get(Uri.parse('http://localhost:5000/managestudyplan/gettallstudplans'),headers: headers);
 
       if (response.statusCode == 200) {
         // Parse the response JSON and return the data
         final List<dynamic> responseData = json.decode(response.body)['data'];
-        print(responseData);
-        setState(() {
 
+        setState(() {
           studyPlans = List<Map<String, dynamic>>.from(responseData);
 
         });
