@@ -310,7 +310,7 @@ class LoginScreen extends StatelessWidget {
 
     try {
       final response = await http.post(
-        Uri.parse('http://localhost:5000/auth/login'),
+        Uri.parse('https://smart-course-registration-system-al0ryihcd.vercel.app/auth/login'),
         headers: {
           'Content-Type': 'application/json',
         },
