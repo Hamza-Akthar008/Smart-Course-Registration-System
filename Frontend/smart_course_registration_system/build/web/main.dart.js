@@ -102886,7 +102886,7 @@ a1=n.d.a.a
 if(J.bB(a0)===0||J.bB(a1)===0){A.bv(B.B,B.H,"Please provide email and password",B.i,3,B.E)
 s=1
 break}p=4
-d=A.b3("http://localhost:5000/auth/login",0,null)
+d=A.b3("https://smart-course-registration-system-8fne0a422.vercel.app/auth/login",0,null)
 c=t.N
 b=A.V(["Content-Type","application/json"],c,c)
 s=7
