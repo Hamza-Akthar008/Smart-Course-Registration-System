@@ -39,12 +39,7 @@ import { string } from "yup";
 //Mongoose Connect
 //rest object
 const app = express()
-app.use(cors({
-  origin: 'https://smart-course-registration-system-fyp-k873-35hea5qbi.vercel.app/',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allow all methods
-  credentials: true, // Include credentials
- 
-}));
+app.use(cors());
 await dbconfig();
 await syncModels();
 
